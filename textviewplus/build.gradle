@@ -8,7 +8,7 @@ android {
     compileSdkVersion 'android-P'
 
     defaultConfig {
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 'P'
         versionCode 1
         versionName "1.0"
@@ -29,12 +29,6 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-    final RXKOTLIN_VERSION = '2.1.0'
-
-    // RX
-    implementation "io.reactivex.rxjava2:rxkotlin:$RXKOTLIN_VERSION"
-    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
 
     implementation "androidx.appcompat:appcompat:1.0.0-alpha1"
     implementation "androidx.recyclerview:recyclerview:1.0.0-alpha1"

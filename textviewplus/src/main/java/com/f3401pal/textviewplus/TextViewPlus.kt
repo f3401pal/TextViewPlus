@@ -13,16 +13,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.annotation.UiThread
 import androidx.core.text.PrecomputedTextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import java.io.InputStream
 import java.util.*
 
 
 class TextViewPlus : RecyclerView {
 
     private val adapter = Adapter(context)
+    val preComputeText = createPreComputeText(context)
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attributeSet: AttributeSet) : super(context, attributeSet)
@@ -33,33 +34,63 @@ class TextViewPlus : RecyclerView {
         setAdapter(adapter)
     }
 
-    fun setTextAsync(input: InputStream) {
-        if (Objects.equals(Looper.myLooper(), Looper.getMainLooper())) {
-            throw RuntimeException("Running async task on UI thread")
+    fun setTextAsync(fileName: String) {
+        val precomputedText = mutableListOf<Paragraph>().apply {
+            preComputeText(fileName, { this.add(it) })
         }
-        val data = mutableListOf<Paragraph>()
-        val pBuffer = StringBuffer()
-        input.bufferedReader().useLines { lines ->
-            lines.forEach { line ->
-                if(line.isBlank()) {
-                    data.add(Paragraph(pBuffer.toString()))
-                    pBuffer.setLength(0)
-                } else {
-                    pBuffer.append(line)
-                }
-            }
-        }
-        input.close()
-
         handler.post {
-            adapter.data = data.toTypedArray()
-            adapter.notifyDataSetChanged()
+            setText(precomputedText)
+        }
+    }
+
+    @UiThread
+    fun appendText(vararg p: Paragraph) {
+        adapter.data.addAll(p)
+        adapter.notifyDataSetChanged()
+    }
+
+    @UiThread
+    fun appendText(p: List<Paragraph>) {
+        adapter.data.addAll(p)
+        adapter.notifyDataSetChanged()
+    }
+
+    @UiThread
+    fun setText(textData: List<Paragraph>) {
+        adapter.data.clear()
+        adapter.data.addAll(textData)
+        adapter.notifyDataSetChanged()
+    }
+
+    companion object {
+
+        private fun createPreComputeText(context: Context): (fileName: String, onNext: (Paragraph) -> Unit) -> Unit {
+            return { fileName, onNext ->
+                if (Objects.equals(Looper.myLooper(), Looper.getMainLooper())) {
+                    throw RuntimeException("Running async task on UI thread")
+                }
+                val input = context.assets.open(fileName)
+                val pBuffer = StringBuffer()
+                input.bufferedReader().useLines { lines ->
+                    lines.forEach { line ->
+                        if (line.isBlank()) {
+                            Paragraph(pBuffer.toString()).also {
+                                pBuffer.setLength(0)
+                                onNext(it)
+                            }
+                        } else {
+                            pBuffer.append(line)
+                        }
+                    }
+                }
+                input.close()
+            }
         }
     }
 
 }
 
-private data class Paragraph(val raw: String) {
+data class Paragraph(val raw: String) {
 
     internal val precomputedText = PrecomputedTextCompat.create(raw, params)
 
@@ -77,7 +108,7 @@ private class Adapter(context: Context) : RecyclerView.Adapter<ViewHolder>() {
     private val inflater = LayoutInflater.from(context)
     private val spannableFactory = SimpleSpannableFactory()
 
-    internal var data = emptyArray<Paragraph>()
+    internal val data = mutableListOf<Paragraph>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val viewHolder = ViewHolder(inflater.inflate(R.layout.item_text_view, parent, false))

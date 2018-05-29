@@ -46,13 +46,14 @@ class TextViewPlus : RecyclerView {
     @UiThread
     fun appendText(vararg p: Paragraph) {
         adapter.data.addAll(p)
-        adapter.notifyDataSetChanged()
+        adapter.notifyItemRangeInserted(0, p.size)
     }
 
     @UiThread
     fun appendText(p: List<Paragraph>) {
+        val insertPosition = adapter.data.size
         adapter.data.addAll(p)
-        adapter.notifyDataSetChanged()
+        adapter.notifyItemRangeInserted(insertPosition, insertPosition + p.size)
     }
 
     @UiThread

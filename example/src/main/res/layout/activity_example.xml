@@ -7,9 +7,34 @@
     android:padding="16dp"
     >
 
-    <com.f3401pal.textviewplus.TextViewPlus
-        android:id="@+id/textViewPlus"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+    <Button
+        android:id="@+id/launchTextViewPlusActivity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:textAllCaps="false"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        android:text="TextView Plus"
+        />
+
+    <Button
+        android:id="@+id/launchTextViewActivity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:textAllCaps="false"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        android:text="Build-in TextView"
+        />
+
+    <Button
+        android:id="@+id/launchPreComputedTextActivity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:textAllCaps="false"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        android:text="PreComputedText in TextView"
+        />
 
 </LinearLayout>

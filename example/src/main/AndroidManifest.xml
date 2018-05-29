@@ -9,7 +9,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".ExampleActivity">
+        <activity android:name=".ExampleActivity"
+            android:label="Examples"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.SEARCH" />
@@ -17,6 +19,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".TextViewPlusActivity"
+            android:label="Display large amount of text efficiently"
+            />
+        <activity android:name=".TextViewActivity"
+            android:label="Standard setText"
+            />
+        <activity android:name=".PreComputedTextActivity"
+            android:label="Using PreComputedText from Android P"
+            />
 
     </application>
 </manifest>

@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.text.Layout
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.PrecomputedTextCompat
 import com.f3401pal.textviewplus.Paragraph
@@ -18,7 +20,8 @@ import kotlinx.android.synthetic.main.activity_example.*
 import kotlinx.android.synthetic.main.activity_textview.*
 import kotlinx.android.synthetic.main.activity_textview_plus.*
 
-private const val PARAGRAPH_BUFFER_SIZE = 5
+private const val PARAGRAPH_BUFFER_SIZE = 12
+private val textFileNames = arrayOf("san.txt")
 
 class ExampleActivity : AppCompatActivity() {
 
@@ -34,19 +37,14 @@ class ExampleActivity : AppCompatActivity() {
 
 class TextViewPlusActivity : AppCompatActivity() {
 
-    private val computeText: Flowable<Paragraph> by lazy {
-        Flowable.defer {
-            Flowable.create({ emitter: FlowableEmitter<Paragraph> ->
-                textViewPlus.preComputeText("pride.txt", { emitter.onNext(it) })
-                emitter.onComplete()
-            }, BackpressureStrategy.BUFFER)
-        }.subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread()).cache()
-    }
+    private lateinit var computeText: Flowable<Paragraph>
     private var disposable: Disposable? = null
+    private var count = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_textview_plus)
+        computeText = createTextProcessor()
     }
 
     override fun onStart() {
@@ -61,13 +59,42 @@ class TextViewPlusActivity : AppCompatActivity() {
         textViewPlus.setText(emptyList())
         super.onStop()
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when (item?.itemId) {
+            R.id.actionRefresh -> {
+                disposable?.dispose()
+                textViewPlus.setText(emptyList())
+                count = (count + 1) % textFileNames.size
+                computeText = createTextProcessor()
+                disposable = computeText.buffer(PARAGRAPH_BUFFER_SIZE).subscribe({ batch ->
+                    textViewPlus.appendText(batch)
+                })
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun createTextProcessor(): Flowable<Paragraph> {
+        return Flowable.defer {
+            Flowable.create({ emitter: FlowableEmitter<Paragraph> ->
+                textViewPlus.preComputeText(textFileNames[count], { emitter.onNext(it) })
+                emitter.onComplete()
+            }, BackpressureStrategy.BUFFER)
+        }.subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread()).cache()
+    }
 }
 
 class TextViewActivity: AppCompatActivity() {
 
     private val loadText by lazy {
         Single.defer {
-            val input = assets.open("pride.txt")
+            val input = assets.open("san.txt")
             val text = input.bufferedReader().readText()
             input.close()
             Single.just(text)
@@ -101,7 +128,7 @@ class PreComputedTextActivity: AppCompatActivity() {
 
     private val loadText by lazy {
         Single.defer {
-            val input = assets.open("pride.txt")
+            val input = assets.open("san.txt")
             val text = input.bufferedReader().readText()
             input.close()
             val params = PrecomputedTextCompat.Params.Builder(textView.paint).build()

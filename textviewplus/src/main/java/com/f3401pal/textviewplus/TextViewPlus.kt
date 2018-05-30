@@ -71,16 +71,12 @@ class TextViewPlus : RecyclerView {
                     throw RuntimeException("Running async task on UI thread")
                 }
                 val input = context.assets.open(fileName)
-                val pBuffer = StringBuffer()
                 input.bufferedReader().useLines { lines ->
                     lines.forEach { line ->
-                        if (line.isBlank()) {
-                            Paragraph(pBuffer.toString()).also {
-                                pBuffer.setLength(0)
+                        if(line.isNotBlank()) {
+                            Paragraph(line).also {
                                 onNext(it)
                             }
-                        } else {
-                            pBuffer.append(line)
                         }
                     }
                 }
@@ -91,11 +87,12 @@ class TextViewPlus : RecyclerView {
 
 }
 
-data class Paragraph(val raw: String) {
+data class Paragraph(private val raw: String) {
 
     internal val precomputedText = PrecomputedTextCompat.create(raw, params)
 
     companion object {
+
         private val params: PrecomputedTextCompat.Params by lazy {
             PrecomputedTextCompat.Params.Builder(TextPaint().apply {
                 typeface = Typeface.DEFAULT

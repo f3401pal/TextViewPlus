@@ -49,9 +49,9 @@ class TextViewPlusActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        disposable = computeText.buffer(PARAGRAPH_BUFFER_SIZE).subscribe({ batch ->
+        disposable = computeText.buffer(PARAGRAPH_BUFFER_SIZE).subscribe { batch ->
             textViewPlus.appendText(batch)
-        })
+        }
     }
 
     override fun onStop() {
@@ -72,9 +72,9 @@ class TextViewPlusActivity : AppCompatActivity() {
                 textViewPlus.setText(emptyList())
                 count = (count + 1) % textFileNames.size
                 computeText = createTextProcessor()
-                disposable = computeText.buffer(PARAGRAPH_BUFFER_SIZE).subscribe({ batch ->
+                disposable = computeText.buffer(PARAGRAPH_BUFFER_SIZE).subscribe { batch ->
                     textViewPlus.appendText(batch)
-                })
+                }
             }
         }
         return super.onOptionsItemSelected(item)
@@ -83,7 +83,7 @@ class TextViewPlusActivity : AppCompatActivity() {
     private fun createTextProcessor(): Flowable<Paragraph> {
         return Flowable.defer {
             Flowable.create({ emitter: FlowableEmitter<Paragraph> ->
-                textViewPlus.preComputeText(textFileNames[count], { emitter.onNext(it) })
+                textViewPlus.preComputeText(textFileNames[count]) { emitter.onNext(it) }
                 emitter.onComplete()
             }, BackpressureStrategy.BUFFER)
         }.subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread()).cache()

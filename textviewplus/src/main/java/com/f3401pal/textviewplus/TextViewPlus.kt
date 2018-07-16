@@ -1,23 +1,22 @@
 package com.f3401pal.textviewplus
 
 import android.content.Context
-import android.graphics.Typeface
 import android.os.Build
 import android.os.Looper
 import android.text.Layout.JUSTIFICATION_MODE_INTER_WORD
 import android.text.Spannable
 import android.text.SpannableString
-import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.annotation.UiThread
+import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.text.PrecomputedTextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.util.*
+import java.util.concurrent.Executors
 
 
 class TextViewPlus : RecyclerView {
@@ -87,24 +86,13 @@ class TextViewPlus : RecyclerView {
 
 }
 
-data class Paragraph(private val raw: String) {
-
-    internal val precomputedText = PrecomputedTextCompat.create(raw, params)
-
-    companion object {
-
-        private val params: PrecomputedTextCompat.Params by lazy {
-            PrecomputedTextCompat.Params.Builder(TextPaint().apply {
-                typeface = Typeface.DEFAULT
-            }).build()
-        }
-    }
-}
+data class Paragraph(val raw: String)
 
 private class Adapter(context: Context) : RecyclerView.Adapter<ViewHolder>() {
 
     private val inflater = LayoutInflater.from(context)
     private val spannableFactory = SimpleSpannableFactory()
+    private val executor = Executors.newCachedThreadPool()
 
     internal val data = mutableListOf<Paragraph>()
 
@@ -122,14 +110,15 @@ private class Adapter(context: Context) : RecyclerView.Adapter<ViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.textView.text = data[position].precomputedText
+        holder.textView.setTextFuture(PrecomputedTextCompat
+                .getTextFuture(data[position].raw, holder.textView.textMetricsParamsCompat, executor))
     }
 
 }
 
 private class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
-    internal val textView: TextView = view.findViewById(R.id.textView)
+    internal val textView: AppCompatTextView = view.findViewById(R.id.textView)
 
 }
 

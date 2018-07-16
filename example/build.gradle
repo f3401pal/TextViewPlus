@@ -5,11 +5,11 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 'android-P'
+    compileSdkVersion 28
     defaultConfig {
         applicationId "com.f3401pal.textviewplus.example"
         minSdkVersion 24
-        targetSdkVersion 'P'
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -33,6 +33,6 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxkotlin:$RXKOTLIN_VERSION"
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
 
-    implementation 'androidx.appcompat:appcompat:1.0.0-alpha1'
-    implementation "androidx.recyclerview:recyclerview:1.0.0-alpha1"
+    implementation 'androidx.appcompat:appcompat:1.0.0-beta01'
+    implementation "androidx.recyclerview:recyclerview:1.0.0-beta01"
 }
